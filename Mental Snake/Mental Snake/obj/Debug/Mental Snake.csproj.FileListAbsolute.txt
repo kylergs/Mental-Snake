@@ -1,0 +1,10 @@
+c:\users\hp\documents\visual studio 2012\Projects\Mental Snake\Mental Snake\bin\Debug\Mental Snake.exe.config
+c:\users\hp\documents\visual studio 2012\Projects\Mental Snake\Mental Snake\bin\Debug\Mental Snake.exe
+c:\users\hp\documents\visual studio 2012\Projects\Mental Snake\Mental Snake\bin\Debug\Mental Snake.pdb
+c:\users\hp\documents\visual studio 2012\Projects\Mental Snake\Mental Snake\obj\Debug\Mental Snake.csprojResolveAssemblyReference.cache
+c:\users\hp\documents\visual studio 2012\Projects\Mental Snake\Mental Snake\obj\Debug\Mental_Snake.Form1.resources
+c:\users\hp\documents\visual studio 2012\Projects\Mental Snake\Mental Snake\obj\Debug\Mental_Snake.Form2.resources
+c:\users\hp\documents\visual studio 2012\Projects\Mental Snake\Mental Snake\obj\Debug\Mental_Snake.Properties.Resources.resources
+c:\users\hp\documents\visual studio 2012\Projects\Mental Snake\Mental Snake\obj\Debug\Mental Snake.csproj.GenerateResource.Cache
+c:\users\hp\documents\visual studio 2012\Projects\Mental Snake\Mental Snake\obj\Debug\Mental Snake.exe
+c:\users\hp\documents\visual studio 2012\Projects\Mental Snake\Mental Snake\obj\Debug\Mental Snake.pdb
