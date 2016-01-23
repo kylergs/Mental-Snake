@@ -37,7 +37,7 @@ public class Grid implements Cloneable
 
     public Grid ()
     {
-        this(0, 0, 10, 10, 15, 30);
+        this(0, 0, 10, 1, 15, 30);
     }
 
     /*
@@ -49,18 +49,30 @@ public class Grid implements Cloneable
         this(gridToClone.getXPixel(), gridToClone.getYPixel(), gridToClone.getPixelSize(), gridToClone.getGridDimension(), gridToClone.getDotSize(), gridToClone.getSnakeSize());
     }
 
-    public void clone(Grid gridToClone) {
-        this.xPixel = gridToClone.getXPixel();
-        this.yPixel = gridToClone.getYPixel();
-        this.gridPixelSize = gridToClone.getPixelSize();
-        this.gridDimension = gridToClone.getGridDimension();
-        this.dotSize = gridToClone.getDotSize();
-        this.display = gridToClone.getDisplay();
-        Collections.copy(this.griddots, gridToClone.getGridDots());
-        Collections.copy(this.gridlines, gridToClone.getGridLines());
-        this.snake = new Snake(gridToClone.getSnake());
-        this.snakeSize = gridToClone.getSnakeSize();
-    }
+//    public void clone(Grid gridToClone) {
+//        this.xPixel = gridToClone.getXPixel();
+//        this.yPixel = gridToClone.getYPixel();
+//        this.gridPixelSize = gridToClone.getPixelSize();
+//        this.gridDimension = gridToClone.getGridDimension();
+//        this.dotSize = gridToClone.getDotSize();
+//        this.display = gridToClone.getDisplay();
+//        this.griddots.clear();
+//        ArrayList<GridDot> gridDotToClone = gridToClone.getGridDots();
+//        for(int i = 0; i < gridDotToClone.size(); i++)
+//        {
+//            GridDot gridDotI = gridDotToClone.get(i);
+//            this.griddots.add(gridDotI);
+//        }
+//        this.gridlines.clear();
+//        ArrayList<GridLine> gridLineToClone = gridToClone.getGridLines();
+//        for(int i = 0; i < gridLineToClone.size(); i++)
+//        {
+//            GridLine gridLineI = gridLineToClone.get(i);
+//            this.gridlines.add(gridLineI);
+//        }
+//        this.snake = new Snake(gridToClone.getSnake());
+//        this.snakeSize = gridToClone.getSnakeSize();
+//    }
 
     public void initialize()
     {

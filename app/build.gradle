@@ -8,8 +8,8 @@ android {
         applicationId "com.teamawesome.mentalsnakes"
         minSdkVersion 9
         targetSdkVersion 21
-        versionCode 25
-        versionName "0.2.5 Cookie"
+        versionCode 26
+        versionName "0.2.6 Cookie"
     }
     buildTypes {
         release {

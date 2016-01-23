@@ -132,14 +132,7 @@ public class GameScreen {
         if(userCurrent instanceof HAL && !userCrash())
         {
             HAL hal = (HAL)userCurrent;
-            try
-            {
-                hal.makeMove(this);
-            }
-            catch (CloneNotSupportedException e)
-            {
-                e.printStackTrace();
-            }
+            hal.makeMove(this);
         }
         else
         {

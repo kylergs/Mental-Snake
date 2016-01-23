@@ -26,43 +26,30 @@ public class HAL extends User
     /*
      * The logic for HAL's move
      */
-    public void makeMove(GameScreen screen) throws CloneNotSupportedException {
+    public void makeMove(GameScreen screen)
+    {
         int gridDimension = screen.getGridDimension();
-        Grid memoryGrid = new Grid(0, 0, 10, gridDimension, 2, 10); //Choice of integers is arbitary
-        memoryGrid.setSnakeCoordinate((gridDimension - 1)/2, (gridDimension - 1)/2);
-        for(int i = 0; i < memory.size(); i++)
-        {
-            Direction directionI = memory.get(i);
-            memoryGrid.moveSnake(directionI, this);
-        }
+        Grid memoryGrid = rememberGrid(gridDimension);
         ArrayList<Integer> snakeCoordinate = memoryGrid.getSnakeCoordinate();
         ArrayList<Direction> moves = new ArrayList<>();
         moves = initialMoveElimination(moves, gridDimension, snakeCoordinate); //HAL removes the obviously implausible moves
         //If there are no moves left, there is no point cycling, and he chooses a move at random
         ArrayList<Direction> availableMoves = new ArrayList<Direction>();
-        if(moves.size() == 0)
-        {
-            screen.gridMoveSnake(Direction.UP, this);
-            remember(Direction.UP);
-            screen.setLastDirection(Direction.UP);
-        }
 //        If there are moves that HAL can do without crashing into an edge, he will then think more.
-        else
-            for (int i = 0; i < moves.size(); i++) {
-//                We create a clone of the grid that HAL remembers
-                Grid testGrid = new Grid();
-                testGrid.clone(memoryGrid);
-//                We then cycle through the directions left available to the user, testing each one with a dummy user.
-                Direction directionTest = moves.get(i);
-                User dummyUser = new User();
-                testGrid.setSnakeCoordinate(snakeCoordinate.get(0), snakeCoordinate.get(1));
-                testGrid.moveSnake(directionTest, dummyUser);
-                if (!testGrid.getCrash()) {
-                    availableMoves.add(directionTest);
-                }
-                this.setCrash(false);
+        for (int i = 0; i < moves.size(); i++) {
+//          We create a clone of the grid that HAL remembers
+            Grid testGrid = rememberGrid(gridDimension);
+//            We then cycle through the directions left available to the user, testing each one with a dummy user.
+            Direction directionTest = moves.get(i);
+            User dummyUser = new User();
+            testGrid.setSnakeCoordinate(snakeCoordinate.get(0), snakeCoordinate.get(1));
+            testGrid.moveSnake(directionTest, dummyUser);
+            if (!testGrid.getCrash()) {
+                availableMoves.add(directionTest);
             }
-//        We then (provided there are plausible moves) choose the first move
+            this.setCrash(false);
+        }
+        //        We then (provided there are plausible moves) choose the first move
         if(availableMoves.size() == 0)
         {
             screen.gridMoveSnake(Direction.UP, this);
@@ -70,7 +57,7 @@ public class HAL extends User
         }
         else if(availableMoves.size() == 1)
         {
-            Direction directionChosen = randomMove(availableMoves);
+            Direction directionChosen = availableMoves.get(0);
             screen.gridMoveSnake(directionChosen, this);
             remember(directionChosen);
             screen.setLastDirection(directionChosen);
@@ -92,12 +79,11 @@ public class HAL extends User
                 ArrayList<Direction> secondMoves = new ArrayList<Direction>();
                 secondMoves = allMoveConstructor(secondMoves);
                 ArrayList<Integer> directionCrashes = new ArrayList<Integer>();
-                directionCrashes = integerArrayList(0, 4);
+                directionCrashes = integerArrayList(0, availableMoves.size());
 //                We create a clone of the grid that HAL remembers
                 for(int j = 0; j < secondMoves.size(); j++)
                 {
-                    Grid testGrid = new Grid();
-                    testGrid.clone(memoryGrid);
+                    Grid testGrid = rememberGrid(gridDimension);
                     testGrid.setSnakeCoordinate(snakeCoordinate.get(0), snakeCoordinate.get(1));
                     Direction secondMove = secondMoves.get(j);
                     testGrid.moveSnake(firstMove, dummyUser);
@@ -114,7 +100,6 @@ public class HAL extends User
                 {
                     if(directionCrashes.get(i) == 4)
                     {
-                        winMoves.add(0, secondMoves.get(k));
                         winMoves.add(0, firstMove);
                     }
                 }
@@ -148,11 +133,6 @@ public class HAL extends User
         memory.add(directionToRemember);
     }
 
-    public void rememberStart(ArrayList<Integer> startCoordinates)
-    {
-
-    }
-
     /*
      * HAL must have the capacity to forget the moves from the previous game that have been played
      */
@@ -173,27 +153,18 @@ public class HAL extends User
     }
 
     /*
-     * This cumbersome method reverses the directions, in order for the moves to reverse engineered by HAL
+     * This method will take HAL's remembered moves and transfer them into a grid
      */
-    private Direction directionReverse(Direction directionToReverse)
+    public Grid rememberGrid(int gridDimension)
     {
-        if (directionToReverse == Direction.UP)
+        Grid memoryGrid = new Grid(0, 0, 10, gridDimension, 2, 10); //Choice of integers is arbitary
+        memoryGrid.setSnakeCoordinate((gridDimension - 1)/2, (gridDimension - 1)/2);
+        for(int i = 0; i < memory.size(); i++)
         {
-            directionToReverse = Direction.DOWN;
+            Direction directionI = memory.get(i);
+            memoryGrid.moveSnake(directionI, this);
         }
-        else if (directionToReverse == Direction.LEFT)
-        {
-            directionToReverse = Direction.RIGHT;
-        }
-        else if (directionToReverse == Direction.DOWN)
-        {
-            directionToReverse = Direction.UP;
-        }
-        else if (directionToReverse == Direction.RIGHT)
-        {
-            directionToReverse = Direction.LEFT;
-        }
-        return directionToReverse;
+        return memoryGrid;
     }
 
     public ArrayList<Direction> initialMoveElimination(ArrayList<Direction> moves, int gridDimension, ArrayList<Integer> snakeCoordinate)

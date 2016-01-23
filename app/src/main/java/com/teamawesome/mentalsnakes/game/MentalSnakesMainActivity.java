@@ -18,7 +18,7 @@ public class MentalSnakesMainActivity extends Screen {
     private int SCREEN_WIDTH; //The width of the screen
     private int SCREEN_HEIGHT; //The height of the screen
     private Graphics g; //The graphics object, which handles drawing
-    private String versionNumber = "v0.2.5 Cookie"; //Version number string (drawn to screen)
+    private String versionNumber = "v0.2.6 Cookie"; //Version number string (drawn to screen)
     private static Typeface font; //The typeface used in the game
     private static int FONT_SIZE = 400; //The fontsize for the background font
     private static int STROKE_WIDTH = 5; //The stroke SCREEN_WIDTH of the font used

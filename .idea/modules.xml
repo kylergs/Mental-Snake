@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/MentalSnakes.iml" filepath="$PROJECT_DIR$/MentalSnakes.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Mental-Snake.iml" filepath="$PROJECT_DIR$/Mental-Snake.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
