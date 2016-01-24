@@ -1,5 +1,8 @@
 package com.teamawesome.mentalsnakes.game;
 
+import android.widget.ArrayAdapter;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,35 +35,19 @@ public class HAL extends User
         Grid memoryGrid = rememberGrid(gridDimension);
         ArrayList<Integer> snakeCoordinate = memoryGrid.getSnakeCoordinate();
         ArrayList<Direction> moves = new ArrayList<>();
-        moves = initialMoveElimination(moves, gridDimension, snakeCoordinate); //HAL removes the obviously implausible moves
+        moves = initialMoveElimination(gridDimension, snakeCoordinate); //HAL removes the obviously implausible moves
         //If there are no moves left, there is no point cycling, and he chooses a move at random
-        ArrayList<Direction> availableMoves = new ArrayList<Direction>();
 //        If there are moves that HAL can do without crashing into an edge, he will then think more.
-        for (int i = 0; i < moves.size(); i++) {
-//          We create a clone of the grid that HAL remembers
-            Grid testGrid = rememberGrid(gridDimension);
-//            We then cycle through the directions left available to the user, testing each one with a dummy user.
-            Direction directionTest = moves.get(i);
-            User dummyUser = new User();
-            testGrid.setSnakeCoordinate(snakeCoordinate.get(0), snakeCoordinate.get(1));
-            testGrid.moveSnake(directionTest, dummyUser);
-            if (!testGrid.getCrash()) {
-                availableMoves.add(directionTest);
-            }
-            this.setCrash(false);
-        }
+        ArrayList<Direction> availableMoves = noCrashMoves(gridDimension, snakeCoordinate);
         //        We then (provided there are plausible moves) choose the first move
         if(availableMoves.size() == 0)
         {
-            screen.gridMoveSnake(Direction.UP, this);
-            remember(Direction.UP);
+            move(screen, Direction.UP);
         }
         else if(availableMoves.size() == 1)
         {
             Direction directionChosen = availableMoves.get(0);
-            screen.gridMoveSnake(directionChosen, this);
-            remember(directionChosen);
-            screen.setLastDirection(directionChosen);
+            move(screen, directionChosen);
         }
 //        If HAL can carry out more than one possible move, we will add further stages of thinking.
         else
@@ -68,57 +55,44 @@ public class HAL extends User
 //            If we find a move that traps the future user, then we wish to choose this move.
             ArrayList<Direction> winMoves = new ArrayList<Direction>();
 //            We wish to cycle through all the moves that are still available to HAL
-            for (int i = 0; i < availableMoves.size(); i++)
-            {
-//                For each available move, we wish to test with a series of second moves.
-//                We loop through our available directions, and for each loop through our secondDirecions
-                Direction firstMove = availableMoves.get(i);
-                User dummyUser = new User();
-//                For each direction, we wish to compute a further move, so construct an ArrayList of 4 moves
-//                We will assign the ith move a rank, based on how many subsequent directions the user crashes in.
-                ArrayList<Direction> secondMoves = new ArrayList<Direction>();
-                secondMoves = allMoveConstructor(secondMoves);
-                ArrayList<Integer> directionCrashes = new ArrayList<Integer>();
-                directionCrashes = integerArrayList(0, availableMoves.size());
-//                We create a clone of the grid that HAL remembers
-                for(int j = 0; j < secondMoves.size(); j++)
-                {
-                    Grid testGrid = rememberGrid(gridDimension);
-                    testGrid.setSnakeCoordinate(snakeCoordinate.get(0), snakeCoordinate.get(1));
-                    Direction secondMove = secondMoves.get(j);
-                    testGrid.moveSnake(firstMove, dummyUser);
-                    testGrid.moveSnake(secondMove, dummyUser);
-                    if (testGrid.getCrash())
-                    {
-                        directionCrashes.set(i, directionCrashes.get(i) + 1);
-                    }
-                    this.setCrash(false);
-                    testGrid.recreate(testGrid.getGridDimension());
-                }
-//                If the user crashes no matter what direction he moves next, then we have trapped him.
-                for(int k = 0; k < directionCrashes.size(); k++)
-                {
-                    if(directionCrashes.get(i) == 4)
-                    {
-                        winMoves.add(0, firstMove);
-                    }
-                }
-            }
+            winMoves = getWinMoves(availableMoves, new ArrayList<Direction>(), gridDimension, snakeCoordinate);
 //            If there is a direction in which we can trap the user, HAL should move in that direction.
 //            Otherwise, HAL will select a move at random s.t. the user cannot predict his moves.
             if(winMoves.size() != 0)
             {
                 Direction directionChosen = winMoves.get(0);
-                screen.gridMoveSnake(directionChosen, this);
-                remember(directionChosen);
-                screen.setLastDirection(directionChosen);
+                move(screen, directionChosen);
             }
             else
             {
-                Direction directionChosen = randomMove(availableMoves);
-                screen.gridMoveSnake(directionChosen, this);
-                remember(directionChosen);
-                screen.setLastDirection(directionChosen);
+                ArrayList<Direction> secondWinMoves = new ArrayList<Direction>();
+                ArrayList<Integer> numSecondWins = new ArrayList<Integer>();
+                for(int i = 0; i < availableMoves.size(); i++)
+                {
+                    ArrayList<Direction> previousMoves = new ArrayList<Direction>();
+                    previousMoves.add((availableMoves.get(i)));
+                    secondWinMoves = getWinMoves(availableMoves, previousMoves, gridDimension, snakeCoordinate);
+                    numSecondWins.add(secondWinMoves.size());
+                }
+                for(int i = 0; i < numSecondWins.size(); i++)
+                {
+                    int numSecondWinCurrent = numSecondWins.get(i);
+                    if(numSecondWinCurrent == 4)
+                    {
+                        availableMoves.remove(i);
+                    }
+                }
+                if(availableMoves.size() == 0)
+                {
+                    move(screen, Direction.UP);
+                }
+                else
+                {
+                    Direction directionChosen = randomMove(availableMoves);
+                    move(screen, directionChosen);
+                }
+//                Direction directionChosen = randomMove(availableMoves);
+//                move(screen, directionChosen);
             }
         }
         screen.increaseUserPlayerNumber(1);
@@ -167,9 +141,9 @@ public class HAL extends User
         return memoryGrid;
     }
 
-    public ArrayList<Direction> initialMoveElimination(ArrayList<Direction> moves, int gridDimension, ArrayList<Integer> snakeCoordinate)
+    public ArrayList<Direction> initialMoveElimination(int gridDimension, ArrayList<Integer> snakeCoordinate)
     {
-        moves = allMoveConstructor(moves);
+        ArrayList<Direction> moves = allMoveConstructor();
         if(snakeCoordinate.get(0) == 0)
         {
             moves.remove(Direction.LEFT);
@@ -189,8 +163,82 @@ public class HAL extends User
         return moves;
     }
 
-    public ArrayList<Direction> allMoveConstructor(ArrayList<Direction> moves)
+    /*
+     * This returns the moves from the input that don't result in a crash
+     */
+    public ArrayList<Direction> noCrashMoves(int gridDimension, ArrayList<Integer> snakeCoordinate)
     {
+        ArrayList<Direction> moves = allMoveConstructor();
+        ArrayList<Direction> availableMoves = new ArrayList<>();
+        for (int i = 0; i < 4 - 1; i++)
+        {
+//          We create a clone of the grid that HAL remembers
+            Grid testGrid = rememberGrid(gridDimension);
+//            We then cycle through the directions left available to the user, testing each one with a dummy user.
+            Direction directionTest = moves.get(i);
+            User dummyUser = new User();
+            testGrid.setSnakeCoordinate(snakeCoordinate.get(0), snakeCoordinate.get(1));
+            testGrid.moveSnake(directionTest, dummyUser);
+            if (!testGrid.getCrash())
+            {
+                availableMoves.add(directionTest);
+            }
+            this.setCrash(false);
+        }
+        return availableMoves;
+    }
+
+    /*
+     * This method grabs any moves that will result in a crash after a second move by the user after HAL has moved.
+     */
+    public ArrayList<Direction> getWinMoves(ArrayList<Direction> availableMoves, ArrayList<Direction> previousMoves, int gridDimension, ArrayList<Integer> snakeCoordinate)
+    {
+        ArrayList<Direction> winMoves = new ArrayList<Direction>();
+        for (int i = 0; i < availableMoves.size(); i++)
+        {
+//                For each available move, we wish to test with a series of second moves.
+//                We loop through our available directions, and for each loop through our secondDirecions
+            Direction firstMove = availableMoves.get(i);
+            User dummyUser = new User();
+//                For each direction, we wish to compute a further move, so construct an ArrayList of 4 moves
+//                We will assign the ith move a rank, based on how many subsequent directions the user crashes in
+            ArrayList<Direction> secondMoves = allMoveConstructor();
+            ArrayList<Integer> directionCrashes = integerArrayList(0, availableMoves.size());
+//                We create a clone of the grid that HAL remembers
+            for(int j = 0; j < secondMoves.size(); j++)
+            {
+                Grid testGrid = rememberGrid(gridDimension);
+                testGrid.setSnakeCoordinate(snakeCoordinate.get(0), snakeCoordinate.get(1));
+                Direction secondMove = secondMoves.get(j);
+                for(int k = 0; k < previousMoves.size(); k++)
+                {
+                    testGrid.moveSnake(previousMoves.get(k), dummyUser);
+                }
+                testGrid.moveSnake(firstMove, dummyUser);
+                testGrid.moveSnake(secondMove, dummyUser);
+                if (testGrid.getCrash())
+                {
+                    directionCrashes.set(i, directionCrashes.get(i) + 1);
+                }
+                this.setCrash(false);
+                testGrid.recreate(testGrid.getGridDimension());
+            }
+//                If the user crashes no matter what direction he moves next, then we have trapped him.
+            for(int k = 0; k < directionCrashes.size(); k++)
+            {
+                if(directionCrashes.get(i) == 4)
+                {
+                    winMoves.add(0, firstMove);
+                }
+            }
+        }
+        return winMoves;
+    }
+
+
+    public ArrayList<Direction> allMoveConstructor()
+    {
+        ArrayList<Direction> moves = new ArrayList<Direction>();
         moves.add(Direction.UP);
         moves.add(Direction.LEFT);
         moves.add(Direction.RIGHT);
@@ -207,4 +255,12 @@ public class HAL extends User
         }
         return integerArrayList;
     }
+
+    public void move(GameScreen screen, Direction directionChosen)
+    {
+        screen.gridMoveSnake(directionChosen, this);
+        remember(directionChosen);
+        screen.setLastDirection(directionChosen);
+    }
+
 }
